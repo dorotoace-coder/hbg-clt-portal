@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     // Define the schema for the AI response
     // We use gemini-1.5-flash as it's the recommended default for text tasks
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-pro",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
