@@ -9,9 +9,10 @@ const genAI = new GoogleGenerativeAI(apiKey);
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { doctrinePack, targetDate, anchorCharacter, anchorScripture, previouslyGeneratedTitles } = body;
+    const { doctrinePack, targetDate, anchorCharacter, anchorScripture, previouslyGeneratedTitles, sourceType, rawMaterialText } = body;
 
-    if (!doctrinePack) {
+    // We no longer strictly require doctrinePack if they supplied Sermon or Song.
+    if (!sourceType && !doctrinePack) {
       return NextResponse.json({ error: "Doctrine Pack is required." }, { status: 400 });
     }
 
@@ -60,15 +61,35 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Construct Source Instruction Dynamically
+    let sourceInstruction = "";
+    if (sourceType === "sermon" && rawMaterialText) {
+      sourceInstruction = `
+      - Source Material: Raw Sermon Transcript / Notes
+      - Provided Text: """${rawMaterialText}"""
+      
+      INSTRUCTION: Extract the major anchor points, deep revelation, and key scriptures directly from the sermon text provided above. Synthesize it into a powerful, focused bite-sized teaching.
+      `;
+    } else if (sourceType === "song" && rawMaterialText) {
+      sourceInstruction = `
+      - Source Material: Song Lyrics / Song Theme
+      - Provided Text: """${rawMaterialText}"""
+      
+      INSTRUCTION: Build this devotional to highlight the spiritual theme, anchor lyrics, and the heart behind this song. Expand the core message of the song into a deep, biblical teaching. Keep the tone musical and inspiring.
+      `;
+    } else {
+      sourceInstruction = `- Source Doctrine Pack: "${doctrinePack}"`;
+    }
+
     const prompt = `
       You are an expert biblical editor and devotional writer for the HBG-CLT ministry.
-      Your task is to draft a daily devotional based on a specific 'Doctrine Pack' sermon summary.
+      Your task is to draft a daily devotional from the provide source material.
       
       Here is the context for today's devotional:
       - Target Date: ${targetDate || "Today"}
-      - Source Doctrine Pack: "${doctrinePack}"
-      - Anchor Character / Theme: ${anchorCharacter || "Not specified (use an appropriate biblical figure related to the topic)"}
-      - Anchor Scripture: ${anchorScripture || "Not specified (find an appropriate scripture)"}
+      ${sourceInstruction}
+      - Anchor Character / Theme: ${anchorCharacter || "Not specified (use an appropriate biblical figure related to the topic if it fits)"}
+      - Anchor Scripture: ${anchorScripture || "Not specified (find an appropriate scripture if not explicitly stated in the source text)"}
       
       ${previouslyGeneratedTitles?.length ? `IMPORTANT: Avoid using any of these recent titles again or similar concepts: ${previouslyGeneratedTitles.join(', ')}` : ""}
 

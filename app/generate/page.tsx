@@ -23,6 +23,8 @@ export default function GenerateDevotional() {
   const router = useRouter();
 
   // Thematic Context
+  const [sourceType, setSourceType] = useState("doctrine_pack");
+  const [rawMaterialText, setRawMaterialText] = useState("");
   const [targetDate, setTargetDate] = useState("");
   const [doctrinePack, setDoctrinePack] = useState("");
   const [anchorCharacter, setAnchorCharacter] = useState("");
@@ -45,8 +47,12 @@ export default function GenerateDevotional() {
   const [successMsg, setSuccessMsg] = useState("");
 
   const handleAiAutoFill = async () => {
-    if (!doctrinePack || doctrinePack === "Select a Sermon / Doctrine Pack") {
+    if (sourceType === "doctrine_pack" && (!doctrinePack || doctrinePack === "")) {
       setError("Please select a Doctrine Pack before generating.");
+      return;
+    }
+    if ((sourceType === "sermon" || sourceType === "song") && !rawMaterialText.trim()) {
+      setError("Please paste your Sermon Notes or Song Lyrics to proceed.");
       return;
     }
 
@@ -61,8 +67,10 @@ export default function GenerateDevotional() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          sourceType,
+          rawMaterialText,
           targetDate,
-          doctrinePack,
+          doctrinePack: sourceType === "doctrine_pack" ? doctrinePack : "Custom Source",
           anchorCharacter,
           anchorScripture,
         }),
@@ -101,7 +109,7 @@ export default function GenerateDevotional() {
     
     const currentFormState: DevotionalFormState = {
       targetDate,
-      doctrinePack,
+      doctrinePack: sourceType === "doctrine_pack" ? doctrinePack : `${sourceType === 'sermon' ? 'Sermon' : 'Song'} Reference`,
       anchorCharacter,
       anchorScripture,
       title,
@@ -136,7 +144,7 @@ export default function GenerateDevotional() {
       <div className="max-w-4xl mx-auto w-full">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-hbg-blue-900">CLT Generator</h1>
-          <p className="text-gray-500 mt-1">Create a new daily devotional derived from active doctrine packs.</p>
+          <p className="text-gray-500 mt-1">Create a new daily devotional derived from active doctrine packs, sermons, or songs.</p>
         </div>
 
         {error && (
@@ -162,26 +170,58 @@ export default function GenerateDevotional() {
           <form className="p-6 md:p-8 space-y-8">
             {/* Context Inputs */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">1. Thematic Context</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">1. Source Context</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Target Date</label>
-                  <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Source Doctrine Pack</label>
-                  <select value={doctrinePack} onChange={(e) => setDoctrinePack(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500 bg-white">
-                    <option value="">Select a Sermon / Doctrine Pack</option>
-                    <option value="The Power of Settlement (Part 4)">The Power of Settlement (Part 4)</option>
-                    <option value="Understanding Kingdom Rest">Understanding Kingdom Rest</option>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Source Material Type</label>
+                  <select 
+                    value={sourceType} 
+                    onChange={(e) => setSourceType(e.target.value)} 
+                    className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500 bg-white"
+                  >
+                    <option value="doctrine_pack">Pre-installed Doctrine Pack</option>
+                    <option value="sermon">Raw Sermon Transcript / Notes</option>
+                    <option value="song">Song Lyrics / Theme</option>
                   </select>
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bible Character / Anchor</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Target Date <span className="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
+                </div>
+
+                {sourceType === "doctrine_pack" ? (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Doctrine Pack</label>
+                    <select value={doctrinePack} onChange={(e) => setDoctrinePack(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500 bg-white">
+                      <option value="">Select a Sermon / Doctrine Pack</option>
+                      <option value="The Power of Settlement (Part 4)">The Power of Settlement (Part 4)</option>
+                      <option value="Understanding Kingdom Rest">Understanding Kingdom Rest</option>
+                      <option value="The Rules of Engagement">The Rules of Engagement</option>
+                      <option value="Faith for the Next Level">Faith for the Next Level</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {sourceType === "sermon" ? "Paste Sermon Notes / Transcript" : "Paste Song Lyrics / Theme Notes"}
+                    </label>
+                    <textarea 
+                      rows={5} 
+                      value={rawMaterialText} 
+                      onChange={(e) => setRawMaterialText(e.target.value)} 
+                      placeholder={sourceType === "sermon" ? "Paste your exact sermon transcription here..." : "Paste your song lyrics here..."}
+                      className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" 
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bible Character / Concept <span className="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="text" placeholder="e.g. David, Joseph, Peter" value={anchorCharacter} onChange={(e) => setAnchorCharacter(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Anchor Scripture</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Anchor Scripture <span className="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="text" placeholder="e.g. Psalms 23:1-2" value={anchorScripture} onChange={(e) => setAnchorScripture(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
                 </div>
               </div>
