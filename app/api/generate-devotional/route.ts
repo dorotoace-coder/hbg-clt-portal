@@ -36,27 +36,43 @@ export async function POST(req: NextRequest) {
               type: SchemaType.STRING,
               description: "An inspiring and captivating title for the daily devotional.",
             },
+            scripture: {
+              type: SchemaType.STRING,
+              description: "The opening scripture relevant to the devotional, including translation reference (e.g., Matthew 5:14 NKJV).",
+            },
+            keyWord: {
+              type: SchemaType.STRING,
+              description: "A short, punchy phrase encapsulating the core point. Example: 'Light is naturally visible.'",
+            },
             wordFocus: {
               type: SchemaType.STRING,
-              description: "The main text/exhortation of the devotional. Should be around 150-250 words.",
+              description: "The main text/exhortation of the devotional. Break down the revelation into directly actionable steps. Avoid being overly poetic.",
+            },
+            bibleInsight: {
+              type: SchemaType.STRING,
+              description: "A profound breakdown of a biblical character, role, or concept. Must be formatted like: 'Bible Insight (Person/Topic): [Content]'",
             },
             prayer: {
               type: SchemaType.STRING,
-              description: "A short, powerful prayer related to the topic.",
+              description: "A short, powerful prayer related to the topic, ending in 'Amen.'",
             },
             confession: {
               type: SchemaType.STRING,
-              description: "A strong prophetic declaration/confession in the first person.",
+              description: "A strong prophetic declaration/confession in the first person. Usually multi-line or bulleted.",
+            },
+            actionPoint: {
+              type: SchemaType.STRING,
+              description: "A single, highly actionable step for the reader to take today.",
             },
             quiz: {
               type: SchemaType.ARRAY,
-              description: "3 quiz questions to test understanding of the devotional.",
+              description: "3 simple quiz questions to test reading comprehension of the devotional.",
               items: {
                 type: SchemaType.STRING,
               },
             },
           },
-          required: ["title", "wordFocus", "prayer", "confession", "quiz"],
+          required: ["title", "scripture", "keyWord", "wordFocus", "bibleInsight", "prayer", "confession", "actionPoint", "quiz"],
         },
       },
     });
@@ -90,6 +106,17 @@ export async function POST(req: NextRequest) {
       4. The piercing prophetic insight, fatherly authority, and profound simplicity of Pastor E.A. Adeboye.
       
       Your task is to draft a daily devotional from the provided source material while fully embodying this exact spiritual cadence.
+      
+      CRITICAL INSTRUCTION: You must structure the output EXACTLY matching this pattern, ensuring no fields are missed:
+      - Title
+      - Opening Scripture (Always include version e.g. NKJV)
+      - Key Word (A punchy naturally visible truth)
+      - Word Focus
+      - Bible Insight (Person/Topic): [Content]
+      - Prayer
+      - Confession (Use bullet points or short exact statements like 'I am light. I shine naturally.')
+      - Action Point
+      - Quiz (3 questions)
       
       Here is the context for today's devotional:
       - Target Date: ${targetDate || "Today"}

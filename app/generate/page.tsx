@@ -11,9 +11,12 @@ type DevotionalFormState = {
   anchorCharacter: string;
   anchorScripture: string;
   title: string;
+  keyWord: string;
   wordFocus: string;
+  bibleInsight: string;
   prayer: string;
   confession: string;
+  actionPoint: string;
   question1: string;
   question2: string;
   question3: string;
@@ -32,9 +35,12 @@ export default function GenerateDevotional() {
 
   // Generated Content
   const [title, setTitle] = useState("");
+  const [keyWord, setKeyWord] = useState("");
   const [wordFocus, setWordFocus] = useState("");
+  const [bibleInsight, setBibleInsight] = useState("");
   const [prayer, setPrayer] = useState("");
   const [confession, setConfession] = useState("");
+  const [actionPoint, setActionPoint] = useState("");
 
   // Quizzes
   const [question1, setQuestion1] = useState("");
@@ -84,9 +90,13 @@ export default function GenerateDevotional() {
 
       if (result.success && result.data) {
         setTitle(result.data.title || "");
+        if (result.data.scripture) setAnchorScripture(result.data.scripture);
+        setKeyWord(result.data.keyWord || "");
         setWordFocus(result.data.wordFocus || "");
+        setBibleInsight(result.data.bibleInsight || "");
         setPrayer(result.data.prayer || "");
         setConfession(result.data.confession || "");
+        setActionPoint(result.data.actionPoint || "");
         
         if (result.data.quiz && Array.isArray(result.data.quiz)) {
           setQuestion1(result.data.quiz[0] || "");
@@ -113,9 +123,12 @@ export default function GenerateDevotional() {
       anchorCharacter,
       anchorScripture,
       title,
+      keyWord,
       wordFocus,
+      bibleInsight,
       prayer,
       confession,
+      actionPoint,
       question1,
       question2,
       question3,
@@ -236,8 +249,16 @@ export default function GenerateDevotional() {
                   <input type="text" placeholder="Devotional Title" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Key Word</label>
+                  <input type="text" placeholder="A punchy natural truth..." value={keyWord} onChange={(e) => setKeyWord(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Word Focus (Main Exhortation)</label>
                   <textarea rows={6} placeholder="The main teaching..." value={wordFocus} onChange={(e) => setWordFocus(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bible Insight</label>
+                  <textarea rows={4} placeholder="Bible Insight (Person): [Content]..." value={bibleInsight} onChange={(e) => setBibleInsight(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Prayer</label>
@@ -246,6 +267,10 @@ export default function GenerateDevotional() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Confession / Declaration</label>
                   <textarea rows={2} placeholder="I declare that I am stepping into divine settlement..." value={confession} onChange={(e) => setConfession(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Action Point</label>
+                  <input type="text" placeholder="A single step for today..." value={actionPoint} onChange={(e) => setActionPoint(e.target.value)} className="w-full rounded-md border border-gray-300 p-2 focus:ring-hbg-blue-500 focus:border-hbg-blue-500" />
                 </div>
               </div>
             </div>
